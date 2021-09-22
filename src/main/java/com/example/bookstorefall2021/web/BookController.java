@@ -18,14 +18,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.bookstorefall2021.model.Book;
 import com.example.bookstorefall2021.model.Bookrepository;
-
-
+import com.example.bookstorefall2021.model.CategoryRepository;
 
 
 @Controller
 public class BookController {
 	@Autowired
 	private Bookrepository repository;
+	
+	@Autowired
+	private CategoryRepository crepository; 
 
 	@RequestMapping(value = "/index", method = RequestMethod.POST)
 	public String showIndex() {
@@ -41,6 +43,7 @@ public class BookController {
 	 @RequestMapping(value = "/add")
 	    public String addBook(Model model){
 	    	model.addAttribute("books", new Book());
+	    	model.addAttribute("categories", crepository.findAll());
 	        return "addbook";
 	    } 
 	 @RequestMapping(value = "/save", method = RequestMethod.POST)
@@ -59,7 +62,8 @@ public class BookController {
 		public String editBook(@PathVariable("id") Long bookId, Model model) {
 			
 			Optional<Book> book = repository.findById(bookId);
-			model.addAttribute("books", book);		
+			model.addAttribute("books", book);	
+			model.addAttribute("categories", crepository.findAll());
 			return "modifybook";
 		}
 	 

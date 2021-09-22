@@ -1,0 +1,135 @@
+warning: LF will be replaced by CRLF in pom.xml.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in src/main/java/com/example/bookstorefall2021/Bookstorefall2021Application.java.
+The file will have its original line endings in your working directory
+[1mdiff --git a/src/main/java/com/example/bookstorefall2021/Bookstorefall2021Application.java b/src/main/java/com/example/bookstorefall2021/Bookstorefall2021Application.java[m
+[1mindex e17aa98..337b516 100644[m
+[1m--- a/src/main/java/com/example/bookstorefall2021/Bookstorefall2021Application.java[m
+[1m+++ b/src/main/java/com/example/bookstorefall2021/Bookstorefall2021Application.java[m
+[36m@@ -9,6 +9,9 @@[m [mimport org.springframework.context.annotation.Bean;[m
+ [m
+ import com.example.bookstorefall2021.model.Book;[m
+ import com.example.bookstorefall2021.model.Bookrepository;[m
+[32m+[m[32mimport com.example.bookstorefall2021.model.Category;[m
+[32m+[m[32mimport com.example.bookstorefall2021.model.CategoryRepository;[m
+[32m+[m
+ [m
+ [m
+ @SpringBootApplication[m
+[36m@@ -21,9 +24,15 @@[m [mpublic class Bookstorefall2021Application {[m
+ 	}[m
+ 	[m
+ 	@Bean[m
+[31m-	public CommandLineRunner bookDemo(Bookrepository repository) {[m
+[32m+[m	[32mpublic CommandLineRunner bookDemo(Bookrepository repository,	 CategoryRepository crepository) {[m
+ 		return (args) -> {[m
+ 			log.info("save a couple of books");[m
+[32m+[m			[32mcrepository.save(new Category("Terror"));[m
+[32m+[m			[32mcrepository.save(new Category("Drama"));[m
+[32m+[m			[32mcrepository.save(new Category("Romance"));[m
+[32m+[m[41m			[m
+[32m+[m[41m			[m
+[32m+[m[41m			[m
+ 			repository.save(new Book("Madman", "John", 1957, "0-4944-4261-1", 14.99));[m
+ 			repository.save(new Book("The Moon", "Peter", 2015, "0-6270-4420-4", 49.99));	[m
+ 			[m
+[1mdiff --git a/src/main/java/com/example/bookstorefall2021/model/Book.java b/src/main/java/com/example/bookstorefall2021/model/Book.java[m
+[1mindex 3065917..c76b25b 100644[m
+[1m--- a/src/main/java/com/example/bookstorefall2021/model/Book.java[m
+[1m+++ b/src/main/java/com/example/bookstorefall2021/model/Book.java[m
+[36m@@ -4,6 +4,9 @@[m [mimport javax.persistence.Entity;[m
+ import javax.persistence.GeneratedValue;[m
+ import javax.persistence.GenerationType;[m
+ import javax.persistence.Id;[m
+[32m+[m[32mimport javax.persistence.JoinColumn;[m
+[32m+[m[32mimport javax.persistence.ManyToOne;[m
+[32m+[m
+ [m
+ @Entity[m
+ public class Book {[m
+[36m@@ -15,6 +18,18 @@[m [mpublic class Book {[m
+ 	private int year;[m
+ 	private String isbn;[m
+ 	private double price;[m
+[32m+[m[41m	[m
+[32m+[m	[32m@ManyToOne[m
+[32m+[m[32m    @JoinColumn(name = "categoryid")[m
+[32m+[m[32m    private Category category;[m
+[32m+[m
+[32m+[m	[32mpublic Category getCategory() {[m
+[32m+[m		[32mreturn category;[m
+[32m+[m	[32m}[m
+[32m+[m
+[32m+[m	[32mpublic void setCategory(Category category) {[m
+[32m+[m		[32mthis.category = category;[m
+[32m+[m	[32m}[m
+ [m
+ 	public Book() {[m
+ 	}[m
+[36m@@ -75,6 +90,7 @@[m [mpublic class Book {[m
+ 	public void setId(Long id) {[m
+ 		this.id = id;[m
+ 	}[m
+[32m+[m[41m	[m
+ [m
+ 	@Override[m
+ 	public String toString() {[m
+[1mdiff --git a/src/main/java/com/example/bookstorefall2021/web/BookController.java b/src/main/java/com/example/bookstorefall2021/web/BookController.java[m
+[1mindex db2f686..e39a272 100644[m
+[1m--- a/src/main/java/com/example/bookstorefall2021/web/BookController.java[m
+[1m+++ b/src/main/java/com/example/bookstorefall2021/web/BookController.java[m
+[36m@@ -18,14 +18,16 @@[m [mimport org.springframework.web.bind.annotation.ResponseBody;[m
+ [m
+ import com.example.bookstorefall2021.model.Book;[m
+ import com.example.bookstorefall2021.model.Bookrepository;[m
+[31m-[m
+[31m-[m
+[32m+[m[32mimport com.example.bookstorefall2021.model.CategoryRepository;[m
+ [m
+ [m
+ @Controller[m
+ public class BookController {[m
+ 	@Autowired[m
+ 	private Bookrepository repository;[m
+[32m+[m[41m	[m
+[32m+[m	[32m@Autowired[m
+[32m+[m	[32mprivate CategoryRepository crepository;[m[41m [m
+ [m
+ 	@RequestMapping(value = "/index", method = RequestMethod.POST)[m
+ 	public String showIndex() {[m
+[36m@@ -41,6 +43,7 @@[m [mpublic class BookController {[m
+ 	 @RequestMapping(value = "/add")[m
+ 	    public String addBook(Model model){[m
+ 	    	model.addAttribute("books", new Book());[m
+[32m+[m	[41m    [m	[32mmodel.addAttribute("categories", crepository.findAll());[m
+ 	        return "addbook";[m
+ 	    } [m
+ 	 @RequestMapping(value = "/save", method = RequestMethod.POST)[m
+[36m@@ -59,7 +62,8 @@[m [mpublic class BookController {[m
+ 		public String editBook(@PathVariable("id") Long bookId, Model model) {[m
+ 			[m
+ 			Optional<Book> book = repository.findById(bookId);[m
+[31m-			model.addAttribute("books", book);		[m
+[32m+[m			[32mmodel.addAttribute("books", book);[m[41m	[m
+[32m+[m			[32mmodel.addAttribute("categories", crepository.findAll());[m
+ 			return "modifybook";[m
+ 		}[m
+ 	 [m
+[1mdiff --git a/src/main/resources/templates/addbook.html b/src/main/resources/templates/addbook.html[m
+[1mindex 44c86c0..c1bffd7 100644[m
+[1m--- a/src/main/resources/templates/addbook.html[m
+[1m+++ b/src/main/resources/templates/addbook.html[m
+[36m@@ -24,6 +24,13 @@[m
+ 			<input type="text" th:field="*{price}" />[m
+ 			<div style="clear: both; display: block; height: 10px;"></div>[m
+ 			<input type="submit" value="Save"></input>[m
+[32m+[m[41m			[m
+[32m+[m			[32m<div style="clear: both; display: block; height: 10px;"></div>[m[41m						[m
+[32m+[m		[41m  [m	[32m<label for="catlist">Category</label>[m
+[32m+[m			[32m <select id="catlist" th:field="*{category}" class="form-control">[m
+[32m+[m[41m       [m			[32m<option th:each="category: ${categories}" th:value="${category.categoryid}" th:text="${category.name}"></option>[m
+[32m+[m[41m    [m		[32m</select>[m
+[32m+[m[41m    		[m
+ 		</form>[m
+ 	</div>[m
+ </body>[m
